@@ -1,0 +1,35 @@
+# Docker Compose file for Reversi
+# Place this at the root of your project (reversi.docker)
+
+version: '3.9'
+services:
+  server:
+    build:
+      context: ./reversi.server
+      dockerfile: Dockerfile
+    image: reversi/server
+    container_name: reversi-server
+    ports:
+      - "4100:4100"
+    environment:
+      NODE_ENV: production
+    networks:
+      - reversi-net
+
+  client:
+    build:
+      context: ./reversi.client
+      dockerfile: Dockerfile
+    image: reversi/client
+    container_name: reversi-client
+    ports:
+      - "4000:3000"
+    depends_on:
+      - server
+    environment:
+      SOCKET_URL: http://host.docker.internal:4100
+    networks:
+      - reversi-net
+
+networks:
+  reversi-net:
