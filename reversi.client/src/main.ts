@@ -4,6 +4,10 @@
  * Bootstraps Vuetify and other plugins then mounts the App`
  */
 
+// Styles (Bootstrap grid & utilities for responsive layout)
+import 'bootstrap/dist/css/bootstrap-grid.min.css'
+import 'bootstrap/dist/css/bootstrap-utilities.min.css'
+
 // Plugins
 import { registerPlugins } from '@/plugins'
 

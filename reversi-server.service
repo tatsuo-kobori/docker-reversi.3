@@ -1,0 +1,29 @@
+# Reversi Socket.IO サーバー自動起動用 systemd ユニット
+#
+# 配置先: /etc/systemd/system/reversi-server.service
+#
+# 導入コマンド:
+#   sudo cp reversi-server.service /etc/systemd/system/reversi-server.service
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now reversi-server.service
+#
+# 状態確認:
+#   sudo systemctl status reversi-server.service
+#   docker compose ps
+
+[Unit]
+Description=Reversi Socket.IO Server (Docker Compose)
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/var/www/html/vhosts/hoge9.xyz/reversi.docker
+ExecStart=/usr/bin/docker-compose up -d server
+ExecStop=/usr/bin/docker-compose down
+TimeoutStartSec=0
+
+[Install]
+WantedBy=multi-user.target

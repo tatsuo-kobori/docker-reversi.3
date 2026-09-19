@@ -1,6 +1,4 @@
 <script lang="ts" setup>
-import white from "@/assets/images/white.png";
-import black from "@/assets/images/black.png";
 const props = defineProps<{
     pieceColor: string
 }>();
@@ -9,6 +7,12 @@ onMounted(() => {
 })
 </script>
 <template>
-    <v-img v-if="pieceColor == 'B'" src="@/assets/images/black.png" width="50px" alt="black" />
-    <v-img v-else-if="pieceColor == 'W'" src="@/assets/images/white.png" width="50px" alt="white" />
+    <img v-if="pieceColor == 'B'" src="@/assets/images/black.png" class="piece" alt="black" />
+    <img v-else-if="pieceColor == 'W'" src="@/assets/images/white.png" class="piece" alt="white" />
 </template>
+<style scoped>
+.piece {
+    width: 100%;
+    height: auto;
+}
+</style>

@@ -4,24 +4,30 @@ import GameInformation from '@/components/GameInformation.vue'
 import MatchTitle from '@/components/GameMatchTitle.vue'
 import GameController from '@/components/GameController.vue'
 import GameEntryDialog from '@/components/GameEntryDialog.vue'
+import GameRoomListDialog from '@/components/GameRoomListDialog.vue'
 import GameSplash from '@/components/GameSplash.vue'
 import { useGameBoardStore } from '@/stores/GameBoardStore.ts';
 // import { EntryUsersList } from "@/types/EntryUsersList";
 import { EntryUserInfo } from "@/types/EntryUserInfo";
 import { BoardInfo } from "@/types/BoardInfo";
+import { RoomList } from "@/types/RoomList";
 // import { Position } from "@/types/Position";
 
 import io from 'socket.io-client';
 import { SOCKET_URL } from './config/default';
 const isNowEntry = ref(false);
+const isEntryUsersDialog = ref(false);
+const isHowToDialog = ref(false);
+const isRoomListDialog = ref(false);
 const gameBoardStore = useGameBoardStore();
-const {boardInfo, entryUsersList} = storeToRefs(gameBoardStore);
+const {boardInfo, entryUsersList, roomList, currentRoomId} = storeToRefs(gameBoardStore);
 //const { decycle, encycle } = require('json-cyclic');
 // const boardInfo = gameBoardStore.boardInfo;
 // const entryUsersList = gameBoardStore.entryUsersList;
 // const turn = gameBoardStore.turnInfo;
 // const pieceColor = gameBoardStore.pieceColor;
 const drawer = ref(false);
+const drawerWidth = ref(256);
 const group = ref(null);
 const entryName = ref<string>('');
 const inGame = ref<boolean>(false);
@@ -29,8 +35,16 @@ const isSplash = ref<boolean>(false);
 const splashMessage = ref<String>('');
 const splash = ref<InstanceType<typeof GameSplash> | null>(null);
 
+const updateDrawerWidth = () => {
+  drawerWidth.value = Math.min(Math.max(window.innerWidth * 0.25, 200), 300);
+};
 onMounted(() => {
   console.log("MOUNTED!!");
+  updateDrawerWidth();
+  window.addEventListener('resize', updateDrawerWidth);
+});
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateDrawerWidth);
 });
 const socket = io(SOCKET_URL);
 //サーバーからのデータ受け取り処理
@@ -40,6 +54,23 @@ socket.on( "connect", () => {
 socket.on( "disconnect", () => {
 	console.log("切断");
 }); //切断
+
+// ルーム一覧の受信
+socket.on("roomList", (roomListStr: string) => {
+  const rooms: RoomList = JSON.parse(roomListStr);
+  gameBoardStore.setRoomList(rooms);
+  // ルーム未入室の場合のみルーム一覧を表示
+  if (currentRoomId.value === "") {
+    isRoomListDialog.value = true;
+  }
+});
+
+// ルーム入室（作成・参加）後に自分のルームIDを受信
+socket.on("roomJoined", (roomIdStr: string) => {
+  const { roomId } = JSON.parse(roomIdStr);
+  gameBoardStore.setCurrentRoomId(roomId);
+  isRoomListDialog.value = false;
+});
 
 socket.on("entryInfo", (entryUsersListStr: string) => {
   let entryUsers = JSON.parse(entryUsersListStr);
@@ -83,6 +114,14 @@ const viewSplash = (message: string, showTime: number) => {
 const isEntry = () => {
   return (entryUsersList.value.users.filter((entry) => entry.socketId === socket.id).length > 0);
 }
+const isInRoom = () => {
+  return currentRoomId.value !== "";
+}
+// 現在居るルームの名称（ルーム一覧から roomId で検索）
+const currentRoomName = computed(() => {
+  const room = roomList.value.rooms.find(r => r.roomId === currentRoomId.value);
+  return room ? room.name : '';
+});
 const mode = () => {
   const myEntry: EntryUserInfo[] | null = entryUsersList.value.users.filter(entry => entry.socketId === socket.id);
   if (myEntry !== null && myEntry.length > 0) return myEntry[0].mode;
@@ -131,7 +170,9 @@ const onEntryCancel = () => {
 }
 const onExit = () => {
   socket.emit("exit");
+  gameBoardStore.setCurrentRoomId("");
   drawer.value = false;
+  isRoomListDialog.value = true;
 }
 const onPass = () => {
   socket.emit("pass", "");
@@ -142,6 +183,29 @@ const onGiveUp = () => {
 const onShowEntryDialog = () => {
   isNowEntry.value = true;
   drawer.value = false;
+}
+const onShowEntryUsersDialog = () => {
+  isEntryUsersDialog.value = true;
+  drawer.value = false;
+}
+const onCloseEntryUsersDialog = () => {
+  isEntryUsersDialog.value = false;
+}
+const onShowRoomList = () => {
+  isRoomListDialog.value = true;
+  drawer.value = false;
+}
+const onCloseRoomListDialog = () => {
+  isRoomListDialog.value = false;
+}
+const onJoinRoom = (roomId: string) => {
+  socket.emit("joinRoom", JSON.stringify({ roomId }));
+}
+const onShowHowToDialog = () => {
+  isHowToDialog.value = true;
+}
+const onCloseHowToDialog = () => {
+  isHowToDialog.value = false;
 }
 </script>
 
@@ -159,42 +223,62 @@ const onShowEntryDialog = () => {
         v-model="drawer"
         class="reversi-menu"
         location='right'
-        width="200"
         temporary
+        :width="drawerWidth"
     >
       <v-list color="transparent">
-        <v-list-item prepend-icon="mdi-login-variant" title="Entry" @click="onShowEntryDialog" id="menu-entry" :disabled="isEntry()"></v-list-item>
-        <v-list-item prepend-icon="mdi-account-multiple" title="Entry People"></v-list-item>
-        <v-list-item prepend-icon="mdi-logout-variant" title="Exit" @click="onExit" :disabled="!isEntry()"></v-list-item>
+        <v-list-item prepend-icon="mdi-view-list" title="ルーム一覧" @click="onShowRoomList"></v-list-item>
+        <v-list-item prepend-icon="mdi-login-variant" title="エントリー" @click="onShowEntryDialog" id="menu-entry" :disabled="isEntry() || !isInRoom()"></v-list-item>
+        <v-list-item prepend-icon="mdi-account-multiple" title="エントリー一覧" @click="onShowEntryUsersDialog" :disabled="!isInRoom()"></v-list-item>
+        <v-list-item prepend-icon="mdi-logout-variant" title="退室" @click="onExit" :disabled="!isInRoom()"></v-list-item>
       </v-list>
     </v-navigation-drawer>
     <!-- メインコンテンツ -->
-    <v-main class="d-flex align-center" style="min-height: 300px">
-      <table>
-        <tbody>
-        <tr>
-          <td style="text-align:center; padding-bottom:15px;"><match-title :entry-users=entryUsersList /></td>
-        </tr>
-        <tr>
-          <td><game-board :board-info=boardInfo @move="onMove"></game-board></td>
-        </tr>
-        <tr>
-          <td style="text-align:center; padding-top:15px;">
-            <game-information :in-game=inGame :mode=mode() :currentTurn=currentTurn() />
-          </td>
-        </tr>
-      </tbody>
-      </table>
-      <!-- v-row justify="center" align-content="center"><v-col>HOGE</v-col></v-row -->
+    <v-main class="d-flex align-items-center justify-content-center" style="min-height: 300px">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
+            <div class="text-center mb-2">
+              <div v-if="currentRoomName" class="room-name-label mx-auto">
+                <v-icon icon="mdi-door" size="small" class="me-1"></v-icon>
+                <span>現在のルーム: {{ currentRoomName }}</span>
+              </div>
+            </div>
+            <div class="text-center mb-3">
+              <match-title :entry-users="entryUsersList" />
+            </div>
+            <div class="d-flex justify-content-center">
+              <game-board :board-info="boardInfo" @move="onMove"></game-board>
+            </div>
+            <div class="text-center mt-3">
+              <game-information :in-game="inGame" :mode="mode()" :currentTurn="currentTurn()" />
+            </div>
+          </div>
+        </div>
+      </div>
     </v-main>
 
     <!-- 下段ナビゲーション -->
     <v-footer class="d-flex align-center justify-center reversi-footer" dark app height="64" absolute>
-      <template v-if="currentTurn() === mode()">
-        <game-controller @pass="onPass" @give-up="onGiveUp"/>
-      </template>
+      <div class="footer-inner">
+        <template v-if="currentTurn() === mode()">
+          <game-controller @pass="onPass" @give-up="onGiveUp"/>
+        </template>
+        <v-btn
+          class="how-to-button"
+          color="primary"
+          variant="elevated"
+          prepend-icon="mdi-help-circle-outline"
+          @click="onShowHowToDialog"
+        >
+          あそび方
+        </v-btn>
+      </div>
     </v-footer>
+    <game-room-list-dialog :is-active="isRoomListDialog" :room-list="roomList" :current-room-id="currentRoomId" @close="onCloseRoomListDialog" @join-room="onJoinRoom" />
     <game-entry-dialog :is-active=isNowEntry @entry="onEntry" @close="onEntryCancel" />
+    <game-entry-users-dialog :is-active="isEntryUsersDialog" :entry-users="entryUsersList" @close="onCloseEntryUsersDialog" />
+    <game-how-to-dialog :is-active="isHowToDialog" @close="onCloseHowToDialog" />
     <game-splash ref="splash" />
     <!-- <v-dialog v-model="isSplash" id="splash" max-width="380"><v-card class="bg-white"><v-card-text  class="d-flex align-center justify-center fill-height">{{ splashMessage }}</v-card-text></v-card></v-dialog> -->
   </v-app>
@@ -204,6 +288,8 @@ html {
   overflow: hidden !important;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  /* 画面幅に応じてルートフォントサイズを流動的に変化させる */
+  font-size: clamp(14px, 0.5vw + 12px, 18px);
 }
 html::-webkit-scrollbar {
   width: 0;
@@ -239,5 +325,30 @@ div.v-bottom-navigation__content {
 }
 .reversi-menu .v-list-item:hover {
   background-color: gainsboro;
+}
+.room-name-label {
+  width: 100%;
+  max-width: 480px;
+  height: 48px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1976d2;
+  color: #fff;
+  border-radius: 8px;
+  box-shadow: 6px 6px 10px 0px rgba(0, 0, 0, 0.4);
+}
+.footer-inner {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.how-to-button {
+  font-weight: 700;
+  position: absolute;
+  right: 16px;
 }
 </style>

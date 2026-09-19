@@ -3,7 +3,6 @@ WORKDIR /app/reversi.server
 COPY package*.json ./
 RUN npm install
 COPY . .
-#RUN npm run build
-EXPOSE 4000
+RUN npm run build
+EXPOSE 4100
 CMD ["npm", "start"]
-

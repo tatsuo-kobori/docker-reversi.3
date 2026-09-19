@@ -14,9 +14,12 @@ const onClickEntry = () => {
 const onClickClose = () => {
     emits('close');
 }
+const onUpdateModelValue = (value: boolean) => {
+    if (!value) emits('close');
+}
 </script>
 <template><!--activator="parent"-->
-    <v-dialog v-model=isActive max-width="400" class="reversi-dialog">
+    <v-dialog :model-value="isActive" @update:model-value="onUpdateModelValue" max-width="400" class="reversi-dialog">
         <!--template v-slot:default="isActive"--><!-- -->
             <v-card rounded="lg">
                 <!--v-card-title class="d-flex justify-space-between align-center text-gray-darken-4 reversi-dialog-header"-->
@@ -115,7 +118,7 @@ const onClickClose = () => {
     box-shadow: 6px 6px 10px 0px rgba(0, 0, 0, 0.4);
 }
 .reversi-dialog-header {
-    font-size: 18px !important;
+    font-size: 1.125rem !important;
     line-height: 1.0;
     height: 42px;
     padding: 10px !important;

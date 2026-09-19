@@ -1,6 +1,6 @@
 <template>
     <div style="color:black; height: 48px; text-align:center;" class="fill-height">
-        <template v-if="entryUsers.users.length == 2">
+        <template v-if="entryUsers.users.length >= 2">
             <div class="mx-auto align-center rounded-lg match-title">
                 <!--span class="user-b">tat</span><span class="user-vs">VS</span><span class="user-w">hoge</span-->
                 <table>
@@ -57,7 +57,8 @@
     /* background: var(--v-theme-panel);*/
     /* background: #f5fffa;*/
     background: whitesmoke;
-    width:400px;
+    width: 100%;
+    max-width: 480px;
     height:48px;
     font-weight: 600;
     display:flex;
@@ -70,11 +71,11 @@
     0px 1px 10px 0px var(--v-shadow-key-ambient-opacity, rgba(0, 0, 0, 0.12));*/
 }
 .match-title table {
-    width: 400px;
+    width: 100%;
     table-layout: fixed;
 }
 .match-title .user-vs {
-    width: 65px;
+    width: 20%;
     color: rgb(183, 1, 1);
     font-weight:900;
     margin: 0px;
@@ -82,7 +83,7 @@
 }
 .match-title .user-w,
 .match-title .user-b {
-    width: 150px;
+    width: 40%;
     font-weight:700;
     padding: 0px;
     overflow: hidden;
@@ -97,7 +98,7 @@
 .match-title .user-w span {
     width: 95px;
     vertical-align:middle;
-    font-size:11pt;
+    font-size:0.9rem;
     overflow: hidden;
     color: #2b2b2b;
 }

@@ -34,7 +34,8 @@
 .reversi-infomation {
   background: whitesmoke;
   color: #303030;
-  width: 400px;
+  width: 100%;
+  max-width: 480px;
   height: 48px;
   font-weight: 600;
   display: flex;

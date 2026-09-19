@@ -6,7 +6,7 @@ import config = require("config");
 
 const port = config.get<number>("port");
 const host = config.get<string>("host");
-const corsOrigin = config.get<string>("corsOrigin");
+const corsOrigin = config.get<string[]>("corsOrigin");
 
 const app = express();
 
@@ -26,7 +26,7 @@ app.get('/', (_ : express.Request, res : express.Response) => {
 server.listen(port, host, () =>{
 // server.listen(port, () =>{
     console.log(`The Realtime server for 'Reversi' has started`)
-		console.log(config.get<string>("corsOrigin"));
+		console.log(config.get<string[]>("corsOrigin"));
     console.log(`[http://${host}/${port}]`);   
 
     socket({ io }); 

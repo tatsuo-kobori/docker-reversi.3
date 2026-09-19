@@ -1,7 +1,13 @@
 # Docker Compose file for Reversi
 # Place this at the root of your project (reversi.docker)
+#
+# 構成メモ:
+#   - クライアント(静的ファイル)はホストの nginx が reversi.client/dist を直接配信する。
+#   - client サービスは「ビルド専用」のワンショット。起動時に bind mount した
+#     ホストの dist へビルド結果を出力し、終了する（restart: "no"）。
+#   - server サービスは socket.io サーバー(4100)。restart: unless-stopped により
+#     クラッシュ時・ホスト再起動時に自動復帰する。
 
-version: '3.9'
 services:
   server:
     build:
@@ -9,12 +15,11 @@ services:
       dockerfile: Dockerfile
     image: reversi/server
     container_name: reversi-server
+    restart: unless-stopped
     ports:
       - "4100:4100"
     environment:
       NODE_ENV: production
-    networks:
-      - reversi-net
 
   client:
     build:
@@ -22,14 +27,6 @@ services:
       dockerfile: Dockerfile
     image: reversi/client
     container_name: reversi-client
-    ports:
-      - "4000:3000"
-    depends_on:
-      - server
-    environment:
-      SOCKET_URL: http://host.docker.internal:4100
-    networks:
-      - reversi-net
-
-networks:
-  reversi-net:
+    restart: "no"
+    volumes:
+      - ./reversi.client/dist:/app/reversi.client/dist
