@@ -144,6 +144,8 @@ function socket({ io }) {
     const startGame = (room) => {
         if (room.entryList.length < 2)
             return;
+        if (room.inGame)
+            return;
         room.inGame = true;
         gameStart(room.boardInfo);
         const searchBoardInfo = JSON.parse(JSON.stringify(room.boardInfo));
@@ -152,6 +154,12 @@ function socket({ io }) {
         emitBoardInfo(room);
         io.to(room.entryList[0].socketId).emit('gameStart', "W");
         io.to(room.entryList[1].socketId).emit('gameStart', "B");
+    };
+    // ゲーム終了後、勝敗メッセージを表示する時間を確保するため、少し待ってから次の対戦を開始する
+    const startGameAfterGameOver = (room) => {
+        setTimeout(() => {
+            startGame(room);
+        }, 5000);
     };
     // ソケットをルームから離脱させる
     const leaveRoom = (socket) => {
@@ -276,7 +284,7 @@ function socket({ io }) {
                 room.inGame = false;
                 rotateAfterGame(room.entryList, judgementResult);
                 emitEntryInfo(room);
-                startGame(room);
+                startGameAfterGameOver(room);
             }
         });
         // パス
@@ -313,7 +321,7 @@ function socket({ io }) {
                 room.inGame = false;
                 rotateAfterGame(room.entryList, winner);
                 emitEntryInfo(room);
-                startGame(room);
+                startGameAfterGameOver(room);
             }
             else {
                 // 待機中に降参 → エントリーリストから削除

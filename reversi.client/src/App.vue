@@ -6,6 +6,9 @@ import GameController from '@/components/GameController.vue'
 import GameEntryDialog from '@/components/GameEntryDialog.vue'
 import GameRoomListDialog from '@/components/GameRoomListDialog.vue'
 import GameSplash from '@/components/GameSplash.vue'
+import winImage from '@/assets/images/win.png'
+import loseImage from '@/assets/images/lose.png'
+import startImage from '@/assets/images/start.png'
 import { useGameBoardStore } from '@/stores/GameBoardStore.ts';
 // import { EntryUsersList } from "@/types/EntryUsersList";
 import { EntryUserInfo } from "@/types/EntryUserInfo";
@@ -87,21 +90,18 @@ socket.on("moveInfo", (boardInfoStr: string) => {
   
 socket.on("gameStart", (players: string) => {
   inGame.value = true;
-  // splash.value?.showSplash("Game Start!", 5000);
-  splash.value?.showSplash("ゲーム開始！", 5000);
+  splash.value?.showImageSplash(startImage, 5000);
 });
   
 socket.on("gameOver", (winner: string) => {
   inGame.value = false;
   if (mode() === winner) {
-    //勝利画面をスプラッシュ表示
-    // splash.value?.showSplash("You Win!", 5000);
-    splash.value?.showSplash("貴方の勝ちです！", 5000);
+    //勝利画面をオーバーレイ表示
+    splash.value?.showImageSplash(winImage, 5000);
   }
   else if (mode() === (winner === 'W' ? 'B' : 'W')) {
-    //敗北画面をスプラッシュ表示
-    // plash.value?.showSplash("You Lose...", 5000);
-    splash.value?.showSplash("負けました...", 5000);
+    //敗北画面をオーバーレイ表示
+    splash.value?.showImageSplash(loseImage, 5000);
   }
 });
 const viewSplash = (message: string, showTime: number) => {
