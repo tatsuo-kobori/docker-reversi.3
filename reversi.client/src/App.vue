@@ -345,10 +345,9 @@ div.v-bottom-navigation__content {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
 }
 .how-to-button {
   font-weight: 700;
-  position: absolute;
-  right: 16px;
 }
 </style>

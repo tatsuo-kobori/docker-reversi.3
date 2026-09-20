@@ -21,8 +21,9 @@ const onGiveUp = () => {
 <style scoped>
 .reversi-game-controller {
     height: 64px;
-    text-align: center;
-    padding-top: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .reversi-game-controller button {
     width: 8em;
