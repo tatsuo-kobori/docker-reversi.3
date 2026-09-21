@@ -270,8 +270,16 @@ const onCloseHowToDialog = () => {
   <v-app class="rounded rounded-md">
     <!-- 上段ナビゲーション -->
     <v-app-bar>
-      <div class="mx-auto"><v-img :width="150" src="@/assets/images/REVERSI-logo.png" alt="REVERSI"></v-img></div>
+      <div class="mx-auto"><v-img class="reversi-title-image" :width="150" src="@/assets/images/REVERSI-logo.png" alt="REVERSI"></v-img></div>
       <!-- <div class="ml-n14"> -->
+        <v-btn
+          class="sound-toggle"
+          :icon="isMuted ? 'mdi-volume-off' : 'mdi-volume-high'"
+          variant="text"
+          size="large"
+          :title="isMuted ? 'サウンドをON' : 'サウンドをOFF'"
+          @click="toggleMute"
+        ></v-btn>
         <v-app-bar-nav-icon class="mr-3" valiant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
         <!-- <v-app-bar-nav-icon class="ms-2" valiant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon> -->
       <!-- </div> -->
@@ -332,14 +340,6 @@ const onCloseHowToDialog = () => {
         </v-btn>
       </div>
     </v-footer>
-    <v-btn
-      class="sound-toggle"
-      :icon="isMuted ? 'mdi-volume-off' : 'mdi-volume-high'"
-      variant="text"
-      size="large"
-      :title="isMuted ? 'サウンドをON' : 'サウンドをOFF'"
-      @click="toggleMute"
-    ></v-btn>
     <game-room-list-dialog :is-active="isRoomListDialog" :room-list="roomList" :current-room-id="currentRoomId" @close="onCloseRoomListDialog" @join-room="onJoinRoom" />
     <game-entry-dialog :is-active="isNowEntry" :reject-message="entryRejectMessage" @entry="onEntry" @close="onEntryCancel" @clear-reject="entryRejectMessage = ''" />
     <game-entry-users-dialog :is-active="isEntryUsersDialog" :entry-users="entryUsersList" @close="onCloseEntryUsersDialog" />
@@ -370,6 +370,9 @@ body {
     flex-wrap: nowrap;
     align-content: center;
     justify-content: center;
+}
+.reversi-title-image {
+  margin-left: 40px;
 }
 header.v-bottom-navigation {
   height: 60px !important;
@@ -416,11 +419,7 @@ div.v-bottom-navigation__content {
   font-weight: 700;
 }
 .sound-toggle {
-  position: fixed;
-  right: 12px;
-  bottom: 76px;
-  background: rgba(0, 0, 0, 0.35);
-  color: #fff;
-  z-index: 2000;
+  color: rgba(0, 0, 0, 0.6);
+  padding-right: 10px;
 }
 </style>
