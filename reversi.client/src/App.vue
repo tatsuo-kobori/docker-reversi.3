@@ -9,6 +9,10 @@ import GameSplash from '@/components/GameSplash.vue'
 import winImage from '@/assets/images/win.png'
 import loseImage from '@/assets/images/lose.png'
 import startImage from '@/assets/images/start.png'
+import startSound from '@/assets/sounds/start.wav'
+import winSound from '@/assets/sounds/win.wav'
+import loseSound from '@/assets/sounds/lose.wav'
+import turnSound from '@/assets/sounds/turn.wav'
 import { useGameBoardStore } from '@/stores/GameBoardStore.ts';
 // import { EntryUsersList } from "@/types/EntryUsersList";
 import { EntryUserInfo } from "@/types/EntryUserInfo";
@@ -38,6 +42,26 @@ const inGame = ref<boolean>(false);
 const isSplash = ref<boolean>(false);
 const splashMessage = ref<String>('');
 const splash = ref<InstanceType<typeof GameSplash> | null>(null);
+const isMuted = ref<boolean>(localStorage.getItem('reversi.isMuted') !== 'false');
+const previousTurn = ref<string>('');
+
+const soundUrls = {
+  start: startSound,
+  win: winSound,
+  lose: loseSound,
+  turn: turnSound,
+} as const;
+
+const playSound = (key: keyof typeof soundUrls) => {
+  if (isMuted.value) return;
+  const audio = new Audio(soundUrls[key]);
+  audio.play().catch(() => {});
+};
+
+const toggleMute = () => {
+  isMuted.value = !isMuted.value;
+  localStorage.setItem('reversi.isMuted', String(isMuted.value));
+};
 
 const updateDrawerWidth = () => {
   drawerWidth.value = Math.min(Math.max(window.innerWidth * 0.25, 200), 300);
@@ -100,23 +124,34 @@ socket.on("entryInfo", (entryUsersListStr: string) => {
   
 socket.on("moveInfo", (boardInfoStr: string) => {
     const info: BoardInfo = JSON.parse(boardInfoStr);
+    const newTurn = info.nextTurn;
+    // ターンが変化したら音を鳴らす（ゲーム開始直後の初回 moveInfo は inGame=false なので鳴らさない）
+    if (inGame.value && previousTurn.value !== '' && newTurn !== previousTurn.value) {
+        playSound('turn');
+    }
+    previousTurn.value = newTurn;
     gameBoardStore.setBoardInfo(info);
     gameBoardStore.setTurn(info.nextTurn);
 });
   
 socket.on("gameStart", (players: string) => {
   inGame.value = true;
+  previousTurn.value = '';
+  playSound('start');
   splash.value?.showImageSplash(startImage, 5000);
 });
   
 socket.on("gameOver", (winner: string) => {
   inGame.value = false;
+  previousTurn.value = '';
   if (mode() === winner) {
     //勝利画面をオーバーレイ表示
+    playSound('win');
     splash.value?.showImageSplash(winImage, 5000);
   }
   else if (mode() === (winner === 'W' ? 'B' : 'W')) {
     //敗北画面をオーバーレイ表示
+    playSound('lose');
     splash.value?.showImageSplash(loseImage, 5000);
   }
 });
@@ -297,6 +332,14 @@ const onCloseHowToDialog = () => {
         </v-btn>
       </div>
     </v-footer>
+    <v-btn
+      class="sound-toggle"
+      :icon="isMuted ? 'mdi-volume-off' : 'mdi-volume-high'"
+      variant="text"
+      size="large"
+      :title="isMuted ? 'サウンドをON' : 'サウンドをOFF'"
+      @click="toggleMute"
+    ></v-btn>
     <game-room-list-dialog :is-active="isRoomListDialog" :room-list="roomList" :current-room-id="currentRoomId" @close="onCloseRoomListDialog" @join-room="onJoinRoom" />
     <game-entry-dialog :is-active="isNowEntry" :reject-message="entryRejectMessage" @entry="onEntry" @close="onEntryCancel" @clear-reject="entryRejectMessage = ''" />
     <game-entry-users-dialog :is-active="isEntryUsersDialog" :entry-users="entryUsersList" @close="onCloseEntryUsersDialog" />
@@ -371,5 +414,13 @@ div.v-bottom-navigation__content {
 }
 .how-to-button {
   font-weight: 700;
+}
+.sound-toggle {
+  position: fixed;
+  right: 12px;
+  bottom: 76px;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  z-index: 2000;
 }
 </style>
