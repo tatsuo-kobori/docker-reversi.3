@@ -372,7 +372,7 @@ body {
     justify-content: center;
 }
 .reversi-title-image {
-  margin-left: 40px;
+  margin-left: 45px;
 }
 header.v-bottom-navigation {
   height: 60px !important;
@@ -420,6 +420,6 @@ div.v-bottom-navigation__content {
 }
 .sound-toggle {
   color: rgba(0, 0, 0, 0.6);
-  padding-right: 10px;
+  padding-right: 15px;
 }
 </style>
