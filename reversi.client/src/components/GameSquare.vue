@@ -3,7 +3,8 @@ const props = defineProps<{
     pieceColor: string
 }>();
 onMounted(() => {
-    console.log(props.pieceColor);
+    // マスチェック・デバッグ用
+    // console.log(props.pieceColor);
 })
 </script>
 <template>
