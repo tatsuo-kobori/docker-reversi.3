@@ -40,6 +40,12 @@ const move = (x:number, y:number) => {
     grid-template-rows: repeat(8, 1fr);
     box-shadow: 6px 6px 10px 0px rgba(0, 0, 0, 0.4);
 }
+/* スマホサイズでは盤面を小さくする（iOSで上下が切れないよう余裕を持たせる） */
+@media (max-width: 576px) {
+    .board {
+        width: 78%;
+    }
+}
 .board-row {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
