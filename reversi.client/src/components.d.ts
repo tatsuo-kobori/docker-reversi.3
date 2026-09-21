@@ -8,7 +8,8 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    AppFooter: typeof import('./components/AppFooter.vue')['default']
+    AppFooter: typeof import('./components/bak/AppFooter.vue')['default']
+    copy: typeof import('./components/bak/HelloWorld copy.vue')['default']
     GameBoard: typeof import('./components/GameBoard.vue')['default']
     GameController: typeof import('./components/GameController.vue')['default']
     GameEntryDialog: typeof import('./components/GameEntryDialog.vue')['default']
@@ -16,12 +17,12 @@ declare module 'vue' {
     GameHowToDialog: typeof import('./components/GameHowToDialog.vue')['default']
     GameInformation: typeof import('./components/GameInformation.vue')['default']
     GameMatchTitle: typeof import('./components/GameMatchTitle.vue')['default']
-    GameMessageArea: typeof import('./components/GameMessageArea.vue')['default']
+    GameMessageArea: typeof import('./components/bak/GameMessageArea.vue')['default']
     GameRoomListDialog: typeof import('./components/GameRoomListDialog.vue')['default']
     GameSplash: typeof import('./components/GameSplash.vue')['default']
     GameSquare: typeof import('./components/GameSquare.vue')['default']
-    HelloWorld: typeof import('./components/HelloWorld.vue')['default']
-    'HelloWorld copy': typeof import('./components/HelloWorld copy.vue')['default']
+    HelloWorld: typeof import('./components/bak/HelloWorld.vue')['default']
+    'HelloWorld copy': typeof import('./components/bak/HelloWorld copy.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
   }
