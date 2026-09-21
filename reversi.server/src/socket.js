@@ -233,6 +233,11 @@ function socket({ io }) {
             if (room.entryList.some(entry => entry.socketId === socket.id))
                 return;
             const userInfo = JSON.parse(userInfoStr);
+            // 同名（大文字小文字を区別）のユーザーが既にいる場合はエントリーを拒否
+            if (room.entryList.some(entry => entry.name === userInfo.name)) {
+                socket.emit("entryReject", JSON.stringify({ status: "NG", reason: "duplicateName" }));
+                return;
+            }
             userInfo.socketId = socket.id;
             room.entryList.push(userInfo);
             assignModes(room.entryList);

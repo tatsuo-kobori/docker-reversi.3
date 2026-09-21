@@ -19,6 +19,7 @@ import { RoomList } from "@/types/RoomList";
 import io from 'socket.io-client';
 import { SOCKET_URL } from './config/default';
 const isNowEntry = ref(false);
+const entryRejectMessage = ref<string>('');
 const isEntryUsersDialog = ref(false);
 const isHowToDialog = ref(false);
 const isRoomListDialog = ref(false);
@@ -73,6 +74,21 @@ socket.on("roomJoined", (roomIdStr: string) => {
   const { roomId } = JSON.parse(roomIdStr);
   gameBoardStore.setCurrentRoomId(roomId);
   isRoomListDialog.value = false;
+  // ルーム選択後はエントリー画面を開く
+  isNowEntry.value = true;
+  entryRejectMessage.value = '';
+});
+
+// エントリー成功（サーバーが受け付けた）
+socket.on("entryAccept", (msg: string) => {
+  isNowEntry.value = false;
+});
+// エントリー拒否（同名ユーザーなど）
+socket.on("entryReject", (msg: string) => {
+  const { reason } = JSON.parse(msg);
+  if (reason === "duplicateName") {
+    entryRejectMessage.value = "このハンドル名は既に使用されています";
+  }
 });
 
 socket.on("entryInfo", (entryUsersListStr: string) => {
@@ -168,7 +184,7 @@ const onEntry = (value?: string) => {
     }
     console.log(JSON.stringify(entryUserInfo));
     socket.emit("entry", JSON.stringify(entryUserInfo));
-    isNowEntry.value = false;
+    // ダイアログは entryAccept 受信時に閉じる（entryReject 時は開いたままエラー表示）
 }
 const onEntryCancel = () => {
   isNowEntry.value = false;
@@ -187,6 +203,7 @@ const onGiveUp = () => {
 }
 const onShowEntryDialog = () => {
   isNowEntry.value = true;
+  entryRejectMessage.value = '';
   drawer.value = false;
 }
 const onShowEntryUsersDialog = () => {
@@ -281,7 +298,7 @@ const onCloseHowToDialog = () => {
       </div>
     </v-footer>
     <game-room-list-dialog :is-active="isRoomListDialog" :room-list="roomList" :current-room-id="currentRoomId" @close="onCloseRoomListDialog" @join-room="onJoinRoom" />
-    <game-entry-dialog :is-active=isNowEntry @entry="onEntry" @close="onEntryCancel" />
+    <game-entry-dialog :is-active="isNowEntry" :reject-message="entryRejectMessage" @entry="onEntry" @close="onEntryCancel" @clear-reject="entryRejectMessage = ''" />
     <game-entry-users-dialog :is-active="isEntryUsersDialog" :entry-users="entryUsersList" @close="onCloseEntryUsersDialog" />
     <game-how-to-dialog :is-active="isHowToDialog" @close="onCloseHowToDialog" />
     <game-splash ref="splash" />
