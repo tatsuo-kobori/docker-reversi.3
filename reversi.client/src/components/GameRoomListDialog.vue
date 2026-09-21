@@ -24,6 +24,10 @@ const onClickRoomItem = (room: RoomInfo) => {
 };
 // 未入室（currentRoomId が空）の間は、ルームを選択するまで閉じられない
 const mustSelect = computed(() => currentRoomId.value === "");
+// 待機中のユーザーに待機順位を付けて表示する（配列[0]=白、[1]=黒、[2]以降=待機）
+const waitingRankText = (index: number): string => {
+    return index >= 2 ? `待機中（${index - 1}番目）` : '待機中';
+};
 </script>
 <template>
     <v-dialog :model-value="isActive" :persistent="mustSelect" @update:model-value="onUpdateModelValue" max-width="480" class="reversi-dialog">
@@ -64,7 +68,7 @@ const mustSelect = computed(() => currentRoomId.value === "");
                                 </template>
                                 <template v-else>
                                     <div
-                                        v-for="user in room.entryUsers"
+                                        v-for="(user, index) in room.entryUsers"
                                         :key="user.socketId"
                                         class="room-user"
                                     >
@@ -84,7 +88,7 @@ const mustSelect = computed(() => currentRoomId.value === "");
                                         <span class="room-user-name">{{ user.name }}</span>
                                         <span v-if="user.mode === 'B'" class="room-user-mode">対戦中（黒）</span>
                                         <span v-else-if="user.mode === 'W'" class="room-user-mode">対戦中（白）</span>
-                                        <span v-else class="room-user-mode">待機中</span>
+                                        <span v-else class="room-user-mode">{{ waitingRankText(index) }}</span>
                                     </div>
                                 </template>
                             </div>

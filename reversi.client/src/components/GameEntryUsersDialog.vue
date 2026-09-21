@@ -15,6 +15,10 @@ const onClickClose = () => {
 const onUpdateModelValue = (value: boolean) => {
     if (!value) emits('close');
 };
+// 待機中のユーザーに待機順位を付けて表示する（配列[0]=白、[1]=黒、[2]以降=待機）
+const waitingRankText = (index: number): string => {
+    return index >= 2 ? `待機中（${index - 1}番目）` : '待機中';
+};
 </script>
 <template>
     <v-dialog :model-value="isActive" @update:model-value="onUpdateModelValue" max-width="400" class="reversi-dialog">
@@ -41,7 +45,7 @@ const onUpdateModelValue = (value: boolean) => {
                 <template v-else>
                     <v-list class="entry-users-list" color="transparent">
                         <v-list-item
-                            v-for="user in entryUsers.users"
+                            v-for="(user, index) in entryUsers.users"
                             :key="user.socketId"
                             :title="user.name"
                         >
@@ -63,7 +67,7 @@ const onUpdateModelValue = (value: boolean) => {
                             <template v-slot:subtitle>
                                 <span v-if="user.mode === 'B'">対戦中（黒）</span>
                                 <span v-else-if="user.mode === 'W'">対戦中（白）</span>
-                                <span v-else>待機中</span>
+                                <span v-else>{{ waitingRankText(index) }}</span>
                             </template>
                         </v-list-item>
                     </v-list>

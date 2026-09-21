@@ -5,8 +5,9 @@
     currentTurn: String,
     mode: String,
     inGame: boolean,
+    waitingRank: number | null,
   }>();
-  const { currentTurn, mode, inGame } = toRefs(props);
+  const { currentTurn, mode, inGame, waitingRank } = toRefs(props);
 </script>
 <template>
     <div style="color:black; height: 48px; text-align:center;" class="fill-height">
@@ -22,6 +23,9 @@
                         ,'white-icon':(currentTurn == 'W')}">Now it's your opponent's turn.</span> -->
           <span :class="{'black-icon':(currentTurn == 'B')
                         ,'white-icon':(currentTurn == 'W')}">相手のターンです</span>
+        </template>
+        <template v-else-if="mode === 'E'">
+          <span>{{ waitingRank !== null ? '待機中（' + waitingRank + '番目）' : '待機中' }}</span>
         </template>
         <template v-else>
           <!-- <span>Watching the game.</span> -->

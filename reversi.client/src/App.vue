@@ -127,6 +127,11 @@ const mode = () => {
   if (myEntry !== null && myEntry.length > 0) return myEntry[0].mode;
   return "";
 }
+// 自分の待機順位（エントリー配列の index - 1。配列[0]=白、[1]=黒、[2]以降=待機）
+const myWaitingRank = computed(() => {
+  const idx = entryUsersList.value.users.findIndex(entry => entry.socketId === socket.id);
+  return idx >= 2 ? idx - 1 : null;
+});
 const currentTurn = () => {
   return boardInfo.value.nextTurn;
 }
@@ -251,7 +256,7 @@ const onCloseHowToDialog = () => {
               <game-board :board-info="boardInfo" @move="onMove"></game-board>
             </div>
             <div class="text-center mt-3">
-              <game-information :in-game="inGame" :mode="mode()" :currentTurn="currentTurn()" />
+              <game-information :in-game="inGame" :mode="mode()" :currentTurn="currentTurn()" :waiting-rank="myWaitingRank" />
             </div>
           </div>
         </div>
