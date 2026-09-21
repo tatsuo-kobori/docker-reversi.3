@@ -43,7 +43,7 @@ const move = (x:number, y:number) => {
 /* スマホサイズでは盤面を小さくする（iOSで上下が切れないよう余裕を持たせる） */
 @media (max-width: 576px) {
     .board {
-        width: 75%;
+        width: 77%;
     }
 }
 .board-row {
