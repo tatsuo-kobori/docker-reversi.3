@@ -372,10 +372,10 @@ body {
     justify-content: center;
 }
 header.v-bottom-navigation {
-  height: 64px !important;
+  height: 60px !important;
 }
 div.v-bottom-navigation__content {
-  height: 64px;
+  height: 60px;
 }
 .reversi-footer {
   width: 100% !important;
