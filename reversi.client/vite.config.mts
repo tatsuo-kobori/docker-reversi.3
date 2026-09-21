@@ -55,13 +55,14 @@ export default defineConfig({
       },
     }),
     {
-      name: 'remove-eot-preload',
+      name: 'remove-font-preload',
       enforce: 'post', // 💡 他の全てのプラグインがHTMLを処理した「後」に実行させる
       transformIndexHtml: {
         order: 'post', // 💡 最新のViteでも一番最後に実行されるよう二重に指定
         handler(html: string): string {
-          // 正規表現をより柔軟にし、改行やスペース、属性の順序に関わらずfont/eotのプレロードを消去
-          return html.replace(/<link\s+[^>]*rel=["']preload["'][^>]*type=["']font\/eot["'][^>]*>/gi, '')
+          // フォントの preload（woff2/woff/ttf/eot）をすべて除去し、
+          // 「preload したのに数秒以内に使われなかった」警告を解消する
+          return html.replace(/<link\s+[^>]*rel=["']preload["'][^>]*as=["']font["'][^>]*>/gi, '')
         }
       }
     }
