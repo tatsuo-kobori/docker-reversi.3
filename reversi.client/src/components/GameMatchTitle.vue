@@ -75,7 +75,7 @@
     table-layout: fixed;
 }
 .match-title .user-vs {
-    width: 20%;
+    width: 23%;
     color: rgb(183, 1, 1);
     font-weight:900;
     margin: 0px;
