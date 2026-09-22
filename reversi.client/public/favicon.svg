@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" id="_レイヤー_1" data-name="レイヤー_1" viewBox="0 0 841.89 595.28" width="841.89" height="595.28"><metadata><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/"><rdf:Description><dc:creator>RealFaviconGenerator</dc:creator><dc:source>https://realfavicongenerator.net</dc:source></rdf:Description></rdf:RDF></metadata><defs>
+    <style>
+      .st0 {
+        fill: #3e3a39;
+      }
+
+      .st0, .st1, .st2, .st3 {
+        stroke-miterlimit: 10;
+        stroke-width: 4px;
+      }
+
+      .st0, .st2 {
+        stroke: #231815;
+      }
+
+      .st1, .st2 {
+        fill: #fff;
+      }
+
+      .st1, .st3 {
+        stroke: #3e3a39;
+      }
+
+      .st3 {
+        fill: #00913a;
+      }
+    </style>
+  </defs><path class="st3" d="M672.13,517.03c0,20.22-16.39,36.61-36.61,36.61H196.74c-20.22,0-36.61-16.39-36.61-36.61V78.25c0-20.22,16.39-36.61,36.61-36.61h438.78c20.22,0,36.61,16.39,36.61,36.61v438.78Z"></path><circle class="st0" cx="284.24" cy="174.71" r="92.42"></circle><line class="st1" x1="416.13" y1="41.64" x2="416.13" y2="553.64"></line><line class="st1" x1="160.13" y1="302.84" x2="672.13" y2="302.84"></line><circle class="st2" cx="284.24" cy="430.98" r="92.42"></circle><circle class="st0" cx="548.03" cy="430.98" r="92.42"></circle></svg>
