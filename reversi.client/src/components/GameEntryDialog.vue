@@ -18,10 +18,10 @@ const nameRules = [
     (v: string) => (!!v && v.length <= 10) || '10文字以内で入力してください',
 ];
 const isValidName = computed(() => handleName.value.trim().length > 0 && handleName.value.length <= 10);
-// エントリー画面を開いたとき、localStorage から前回のハンドル名を復元
+// エントリー画面を開いたとき、sessionStorage から前回のハンドル名を復元
 watch(isActive, (active) => {
     if (active) {
-        handleName.value = localStorage.getItem(STORAGE_KEY) ?? '';
+        handleName.value = sessionStorage.getItem(STORAGE_KEY) ?? '';
     }
 });
 // 入力が変わったら reject エラーをクリア
@@ -30,7 +30,7 @@ watch(handleName, () => {
 });
 const onClickEntry = () => {
     const name = handleName.value.trim();
-    localStorage.setItem(STORAGE_KEY, name);
+    sessionStorage.setItem(STORAGE_KEY, name);
     emits('entry', name);
 }
 const onClickClose = () => {
