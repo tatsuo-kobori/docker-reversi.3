@@ -53,11 +53,16 @@
     pointer-events: none;
 }
 .splash-image {
-    max-width: 75vw;
-    max-height: 50vh;
+    max-width: 432px; /* 盤面(最大480px)の約90% */
     width: auto;
     height: auto;
     filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
+}
+/* モバイルでは盤面(78%)の約90%に合わせる */
+@media (max-width: 576px) {
+    .splash-image {
+        max-width: 70vw;
+    }
 }
 .splash-text {
     font-size: 2.5rem;
