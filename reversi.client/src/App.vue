@@ -39,6 +39,8 @@ const drawerWidth = ref(256);
 const group = ref(null);
 const entryName = ref<string>('');
 const inGame = ref<boolean>(false);
+// ゲーム開始ごとにインクリメントし、game-controller を強制再マウントしてボタンを再アクティブ化する
+const gameKey = ref(0);
 const isSplash = ref<boolean>(false);
 const splashMessage = ref<String>('');
 const splash = ref<InstanceType<typeof GameSplash> | null>(null);
@@ -137,6 +139,7 @@ socket.on("moveInfo", (boardInfoStr: string) => {
 socket.on("gameStart", (players: string) => {
   inGame.value = true;
   previousTurn.value = '';
+  gameKey.value++;
   playSound('start');
   splash.value?.showImageSplash(startImage, 5000);
 });
@@ -327,7 +330,7 @@ const onCloseHowToDialog = () => {
     <v-footer class="d-flex align-center justify-center reversi-footer" dark app height="64" absolute>
       <div class="footer-inner">
         <template v-if="currentTurn() === mode()">
-          <game-controller @pass="onPass" @give-up="onGiveUp"/>
+          <game-controller :key="gameKey" @pass="onPass" @give-up="onGiveUp"/>
         </template>
         <v-btn
           class="how-to-button"
