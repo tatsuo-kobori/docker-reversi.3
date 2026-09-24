@@ -6,8 +6,13 @@ const emits = defineEmits<{
 const onPass = () => {
   emits('pass');
 }
+// ダブルクリックで降参が2回発火し、2回目が「待機中の退出」扱いになるのを防ぐ
+let giveUpLocked = false;
 const onGiveUp = () => {
+  if (giveUpLocked) return;
+  giveUpLocked = true;
   emits('give-up');
+  setTimeout(() => { giveUpLocked = false; }, 1000);
 }
 </script>
 <template>
