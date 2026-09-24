@@ -346,6 +346,12 @@ function socket({io}: {io:Server}){
 			const entry = room.entryList.find(e => e.socketId === socket.id);
 			if (!entry) return;
 			
+			// 連打ガード：短時間に複数回の降参を無視する（3秒クールダウン）
+			const now = Date.now();
+			const last = socket.data.lastSurrenderTime || 0;
+			if (now - last < 3000) return;
+			socket.data.lastSurrenderTime = now;
+			
 			if (room.inGame && (entry.mode === 'W' || entry.mode === 'B')) {
 				// 対戦中に降参 → 相手の勝ち
 				const winner = entry.mode === 'W' ? 'B' : 'W';

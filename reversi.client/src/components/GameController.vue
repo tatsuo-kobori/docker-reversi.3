@@ -3,24 +3,25 @@ const emits = defineEmits<{
     (e: 'pass'): void,
     (e: 'give-up'): void,
 }>();
+// 一度クリックしたら、状態変化（ターン交代／降参）でボタンが再表示されるまで非アクティブにする
+const actionsDisabled = ref(false);
 const onPass = () => {
+  if (actionsDisabled.value) return;
+  actionsDisabled.value = true;
   emits('pass');
 }
-// ダブルクリックで降参が2回発火し、2回目が「待機中の退出」扱いになるのを防ぐ
-let giveUpLocked = false;
 const onGiveUp = () => {
-  if (giveUpLocked) return;
-  giveUpLocked = true;
+  if (actionsDisabled.value) return;
+  actionsDisabled.value = true;
   emits('give-up');
-  setTimeout(() => { giveUpLocked = false; }, 1000);
 }
 </script>
 <template>
   <div class="fill-height reversi-game-controller">
     <!-- <v-btn color="#008080" @click="onPass">PASS!</v-btn> -->
-    <v-btn color="#008080" @click="onPass">パス！</v-btn>
+    <v-btn color="#008080" :disabled="actionsDisabled" @click="onPass">パス！</v-btn>
     <!-- <v-btn color="#008080" @click="onGiveUp">GIVE UP!</v-btn> -->
-    <v-btn color="#008080" @click="onGiveUp">まいった！</v-btn>
+    <v-btn color="#008080" :disabled="actionsDisabled" @click="onGiveUp">まいった！</v-btn>
   </div>
 </template>
 <style scoped>
