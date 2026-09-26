@@ -29,6 +29,7 @@ watch(handleName, () => {
     emits('clearReject');
 });
 const onClickEntry = () => {
+    if (!isValidName.value) return;
     const name = handleName.value.trim();
     sessionStorage.setItem(STORAGE_KEY, name);
     emits('entry', name);
@@ -76,6 +77,7 @@ const onUpdateModelValue = (value: boolean) => {
                     maxlength="10"
                     v-model="handleName"
                     :rules="nameRules"
+                    @keyup.enter="onClickEntry"
                ></v-text-field>
 
                 <div v-if="rejectMessage" class="mb-2 text-red">{{ rejectMessage }}</div>

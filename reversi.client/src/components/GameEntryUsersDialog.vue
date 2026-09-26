@@ -22,7 +22,7 @@ const waitingRankText = (index: number): string => {
 </script>
 <template>
     <v-dialog :model-value="isActive" @update:model-value="onUpdateModelValue" max-width="400" class="reversi-dialog">
-        <v-card rounded="lg">
+        <v-card rounded="lg" @keydown.enter.prevent="onClickClose">
             <v-card-title class="d-flex justify-space-between align-center reversi-dialog-header">
                 <div class="ps-2">
                     <!-- Entry People -->

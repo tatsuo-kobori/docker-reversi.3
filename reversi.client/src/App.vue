@@ -100,9 +100,12 @@ socket.on("roomJoined", (roomIdStr: string) => {
   const { roomId } = JSON.parse(roomIdStr);
   gameBoardStore.setCurrentRoomId(roomId);
   isRoomListDialog.value = false;
-  // ルーム選択後はエントリー画面を開く
-  isNowEntry.value = true;
-  entryRejectMessage.value = '';
+  // ルーム選択後はエントリー画面を開く（観戦の場合は開かない）
+  if (joinAsEntry.value) {
+    isNowEntry.value = true;
+    entryRejectMessage.value = '';
+  }
+  joinAsEntry.value = false;
 });
 
 // エントリー成功（サーバーが受け付けた）
@@ -258,7 +261,9 @@ const onShowRoomList = () => {
 const onCloseRoomListDialog = () => {
   isRoomListDialog.value = false;
 }
-const onJoinRoom = (roomId: string) => {
+const joinAsEntry = ref(false);
+const onJoinRoom = (roomId: string, isEntry: boolean) => {
+  joinAsEntry.value = isEntry;
   socket.emit("joinRoom", JSON.stringify({ roomId }));
 }
 const onShowHowToDialog = () => {

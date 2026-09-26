@@ -10,8 +10,10 @@ const props = defineProps<{
 const { isActive, roomList, currentRoomId } = toRefs(props);
 const emits = defineEmits<{
     (e: 'close'): void,
-    (e: 'joinRoom', roomId: string): void,
+    (e: 'joinRoom', roomId: string, isEntry: boolean): void,
 }>();
+// 選択中のルーム（クリックで選択し、下部ボタンで入室する）
+const selectedRoomId = ref<string>('');
 const onClickClose = () => {
     emits('close');
 };
@@ -20,8 +22,20 @@ const onUpdateModelValue = (value: boolean) => {
 };
 const onClickRoomItem = (room: RoomInfo) => {
     if (room.disabled || room.roomId === currentRoomId.value) return;
-    emits('joinRoom', room.roomId);
+    selectedRoomId.value = room.roomId;
 };
+const onClickWatch = () => {
+    if (!selectedRoomId.value) return;
+    emits('joinRoom', selectedRoomId.value, false);
+};
+const onClickEntry = () => {
+    if (!selectedRoomId.value) return;
+    emits('joinRoom', selectedRoomId.value, true);
+};
+// ダイアログを開くたびに選択状態をリセット
+watch(isActive, (val) => {
+    if (val) selectedRoomId.value = '';
+});
 // 未入室（currentRoomId が空）の間は、ルームを選択するまで閉じられない
 const mustSelect = computed(() => currentRoomId.value === "");
 // 待機中のユーザーに待機順位を付けて表示する（配列[0]=白、[1]=黒、[2]以降=待機）
@@ -31,7 +45,7 @@ const waitingRankText = (index: number): string => {
 </script>
 <template>
     <v-dialog :model-value="isActive" :persistent="mustSelect" @update:model-value="onUpdateModelValue" max-width="480" class="reversi-dialog">
-        <v-card rounded="lg">
+        <v-card rounded="lg" @keydown.enter.prevent="onClickEntry">
             <v-card-title class="d-flex justify-space-between align-center reversi-dialog-header">
                 <div class="ps-2">ルーム一覧</div>
                 <v-btn
@@ -54,7 +68,7 @@ const waitingRankText = (index: number): string => {
                             v-for="room in roomList.rooms"
                             :key="room.roomId"
                             class="room-item"
-                            :class="{ 'room-item-disabled': room.disabled || room.roomId === currentRoomId }"
+                            :class="{ 'room-item-disabled': room.disabled || room.roomId === currentRoomId, 'room-item-selected': room.roomId === selectedRoomId }"
                             @click="onClickRoomItem(room)"
                         >
                             <div class="room-header">
@@ -96,6 +110,11 @@ const waitingRankText = (index: number): string => {
                     </div>
                 </template>
             </v-card-text>
+
+            <v-card-actions v-if="roomList.rooms.length > 0" class="d-flex justify-center gap-2 pb-4">
+                <v-btn color="primary" variant="tonal" :disabled="!selectedRoomId" @click="onClickWatch">観戦する</v-btn>
+                <v-btn color="primary" variant="elevated" :disabled="!selectedRoomId" @click="onClickEntry">エントリー</v-btn>
+            </v-card-actions>
         </v-card>
     </v-dialog>
 </template>
@@ -140,6 +159,10 @@ const waitingRankText = (index: number): string => {
 .room-item-disabled:hover {
     background-color: transparent;
     border-color: #e0e0e0;
+}
+.room-item-selected {
+    border-color: #4caf50;
+    background-color: #e8f5e9;
 }
 .room-header {
     display: flex;
