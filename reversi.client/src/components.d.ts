@@ -21,7 +21,6 @@ declare module 'vue' {
     GameSplash: typeof import('./components/GameSplash.vue')['default']
     GameSquare: typeof import('./components/GameSquare.vue')['default']
     HelloWorld: typeof import('./components/bak/HelloWorld.vue')['default']
-    'HelloWorld copy': typeof import('./components/bak/HelloWorld copy.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
   }
