@@ -77,6 +77,10 @@ export default defineConfig({
     ],
   },
   define: { 'process.env': {} },
+  esbuild: {
+    // 本番ビルド時にライセンスコメント含む全コメントを削除（ブラウザにコメントを残さない）
+    legalComments: 'none',
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

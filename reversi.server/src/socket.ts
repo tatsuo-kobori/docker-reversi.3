@@ -102,7 +102,13 @@ function socket({io}: {io:Server}){
 	
 	const rooms: Map<string, RoomState> = new Map<string, RoomState>();
 	
-	// ルームを初期化して返す
+	/**
+	 * ルームの初期状態を作成して返す
+	 * @param roomId ルームID
+	 * @param name ルーム名
+	 * @param disabled 無効化フラグ
+	 * @returns RoomState 初期化されたルーム状態
+	 */
 	const createRoomState = (roomId: string, name: string, disabled: boolean): RoomState => {
 		const room: RoomState = {
 			roomId: roomId,
@@ -128,6 +134,10 @@ function socket({io}: {io:Server}){
 		rooms.set(roomId, createRoomState(roomId, def.name, def.disabled));
 	});
 	
+	/**
+	 * ルーム一覧をクライアントに送信する
+	 * @returns void
+	 */
 	const emitRoomList = (): void => {
 		const roomList: RoomList = { rooms: [] };
 		rooms.forEach((room) => {
@@ -141,13 +151,23 @@ function socket({io}: {io:Server}){
 		io.emit("roomList", JSON.stringify(roomList));
 	};
 	
-	// ルーム内の観戦者数（ルームに接続している人数 − エントリー人数）を求める
+	/**
+	 * ルーム内の観戦者数を取得する
+	 * @param room ルーム状態
+	 * @returns number 観戦者数
+	 * ルーム内の観戦者数（ルームに接続している人数 − エントリー人数）を求める
+	 */
 	const getSpectatorCount = (room: RoomState): number => {
 		const roomSockets = io.sockets.adapter.rooms.get(room.roomId);
 		const total = roomSockets ? roomSockets.size : 0;
 		return Math.max(0, total - room.entryList.length);
 	};
 
+	/**
+	 * ルーム内のエントリー情報をクライアントに送信する
+	 * @param room ルーム状態
+	 * @returns void
+	 */
 	const emitEntryInfo = (room: RoomState): void => {
 		const entryList: EntryUsersList = {
 			users: room.entryList,
@@ -158,11 +178,21 @@ function socket({io}: {io:Server}){
 		emitRoomList();
 	};
 	
+	/**
+	 * ルーム内のボード情報をクライアントに送信する
+	 * @param room ルーム状態
+	 * @returns void
+	 */
 	const emitBoardInfo = (room: RoomState): void => {
 		io.to(room.roomId).emit("moveInfo", JSON.stringify(room.boardInfo));
 	};
 	
-	// エントリーリストが2人以上なら対戦を開始する
+	/**
+	 * ゲームを開始する
+	 * @param room ルーム状態
+	 * @returns void
+	 * エントリーリストが2人以上なら対戦を開始する
+	 */
 	const startGame = (room: RoomState): void => {
 		if (room.entryList.length < 2) return;
 		if (room.inGame) return;
@@ -176,14 +206,23 @@ function socket({io}: {io:Server}){
 		io.to(room.entryList[1].socketId).emit('gameStart', "B");
 	};
 	
-	// ゲーム終了後、勝敗メッセージを表示する時間を確保するため、少し待ってから次の対戦を開始する
+	/**
+	 * ゲーム終了後、一定時間待ってから次の対戦を開始する
+	 * @param room ルーム状態
+	 * @returns void
+	 * ゲーム終了後、勝敗メッセージを表示する時間を確保するため、少し待ってから次の対戦を開始する
+	 */
 	const startGameAfterGameOver = (room: RoomState): void => {
 		setTimeout(() => {
 			startGame(room);
 		}, 5000);
 	};
 	
-	// ソケットをルームから離脱させる
+	/**
+	 * ソケットをルームから離脱させる
+	 * @param socket ルームから離脱するソケット
+	 * @returns void
+	 */
 	const leaveRoom = (socket: Socket): void => {
 		const roomId = socket.data.roomId;
 		if (!roomId) return;
@@ -219,13 +258,20 @@ function socket({io}: {io:Server}){
 		}
 	};
 	
+	/**
+	 * ソケット接続時の処理
+	 */
 	io.on("connection", (socket: Socket) => {
 		console.log(`User connected ${socket.id}`);
 		
 		// 接続時にルーム一覧を配信
 		emitRoomList();
 		
-		// ルーム参加（観戦）
+		/**
+		 * ルームに参加（観戦）する
+		 * @param roomIdStr ルームIDを含むJSON文字列
+		 * @returns void
+		 */
 		socket.on("joinRoom", (roomIdStr: string) => {
 			const { roomId } = JSON.parse(roomIdStr);
 			const room = rooms.get(roomId);
@@ -243,7 +289,11 @@ function socket({io}: {io:Server}){
 			emitEntryInfo(room);
 		});
 		
-		// エントリー
+		/**
+		 * エントリーする
+		 * @param userInfoStr ユーザー情報を含むJSON文字列
+		 * @returns void
+		 */
 		socket.on("entry", (userInfoStr: string) => {
 			const roomId = socket.data.roomId;
 			if (!roomId) return;
@@ -273,7 +323,11 @@ function socket({io}: {io:Server}){
 			}
 		});
 		
-		// 駒を置く
+		/**
+		 * 駒を置く
+		 * @param moveInfoStr 駒の移動情報を含むJSON文字列
+		 * @returns void
+		 */
 		socket.on("move", (moveInfoStr: string) => {
 			const roomId = socket.data.roomId;
 			if (!roomId) return;
@@ -319,7 +373,10 @@ function socket({io}: {io:Server}){
 			}
 		});
 		
-		// パス
+		/**
+		 * パスする
+		 * @returns void
+		 */
 		socket.on("pass", () => {
 			const roomId = socket.data.roomId;
 			if (!roomId) return;
@@ -336,7 +393,10 @@ function socket({io}: {io:Server}){
 			}
 		});
 		
-		// 降参
+		/**
+		 * 降参する
+		 * @returns void
+		 */
 		socket.on("surrender", () => {
 			const roomId = socket.data.roomId;
 			if (!roomId) return;
@@ -369,12 +429,18 @@ function socket({io}: {io:Server}){
 			}
 		});
 		
-		// 退室
+		/**
+		 * ルームから退室する（ルームから離脱）
+		 * @returns void
+		 */
 		socket.on("exit", () => {
 			leaveRoom(socket);
 		});
 		
-		// 切断
+		/**
+		 * 切断
+		 * @returns void
+		 */
 		socket.on("disconnect", () => {
 			console.log("disconnect:"+socket.id);
 			leaveRoom(socket);
